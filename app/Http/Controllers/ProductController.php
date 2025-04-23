@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProcductRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -28,15 +29,27 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProcductRequest $request)
     {
-        $producto = [
-            'descripcion' => $request->descripcion,
-            'precio' => $request->precio,
-            'cantidad' => $request->cantidad,
+        /*$messages =[
+            'required' => 'El campo :attribute es requerido',
+            'numeric' => 'El campo :attribute debe ser un número',
+            'string' => 'El campo :attribute debe ser una cadena de texto',
+            'max' => 'El campo :attribute no debe exceder :max caracteres',
         ];
-        Product::create($producto);
-        return redirect()->route('products.index');
+        $validate = $request->validate([
+            'descripcion'=> 'required|string|max:100',
+            'precio'=> 'required|numeric',
+            'cantidad'=> 'required|numeric',
+        ], $messages);*/
+        $validate = $request->validated();
+        $product = new Product();
+        $product->descripcion = $request->descripcion;
+        $product->precio = $request->precio;
+        $product->cantidad = $request->cantidad;
+        $product->save();
+
+        return redirect()->route('products.index')->with('success', 'Producto creado con éxito');
     }
 
     /**
@@ -53,7 +66,7 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        return view('products.edit', compact('id'));
     }
 
     /**
@@ -62,11 +75,11 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         $user = Product::find($id);
-        $user->descripcion = 'Chamarra';
-        $user->precio = '100';
-        $user->cantidad = '10';
+        $user->descripcion = $request->descripcion;;
+        $user->precio = $request->precio;
+        $user->cantidad = $request->cantidad;
         $user->save();
-        return 'Producto actualizado';
+        return redirect()->route('products.index'->with('success', 'Producto actualizado con éxito'));
     }
 
     /**
@@ -76,6 +89,6 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         $product->delete();
-        return 'Producto eliminado';
+        return redirect('products.index');
     }
 }
